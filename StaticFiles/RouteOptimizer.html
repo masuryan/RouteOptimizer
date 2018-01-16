@@ -27,7 +27,12 @@
         var sourcepointsnamescount = 0;
         var destinationpoints = "[";
         var noofdestinationpoints = 0;
-        var colors = ['#ff0000', '#20b2aa', '#320f3c', '#cd9b1d', '#ffd700', '#eb5e88', '#008000', '#c0c0c0']
+        var colors = ['#ff0000', '#20b2aa', '#320f3c', '#cd9b1d', '#ffd700', '#eb5e88', '#008000', '#c0c0c0'];
+
+
+        var s = 0;
+        var r = 0;
+        var k = 0;
 
 
 
@@ -123,7 +128,7 @@
             var point1 = new Microsoft.Maps.Location(Number(res1[0]), Number(res1[1]));
             var point2 = new Microsoft.Maps.Location(Number(res2[0]), Number(res2[1]));
 
-            //alert(res1[0]+res1[1]+" "+res2[0]+res2[1]);
+
             if (pintyp == 0) {
                 var ind = Number(i) - 1;
                 var pin = new Microsoft.Maps.Pushpin(point1, {
@@ -177,27 +182,73 @@
                 client.setRequestHeader("Connection", "close");
 
                 client.send(inputToRouteServiceJSON);
-                if (client.status == 200)
-                    alert("The request succeeded!\n\nThe response representation was:\n\n" + client.responseText)
+                if (client.status == 200){
+                    document.getElementById("inst").value = client.responseText;
+                    drawoptimizedroutes(client.responseText);}
                 else
-                    alert("The request did not succeed!\n\nThe response status was: " + client.status + " " + client.statusText + ".");
+                    alert("The request did not succeed!\n\nThe response status was: " + client.status + " " +  + ".");
 
-
-
-
-
-
-                drawRoute('13.055876981865168,77.43415355682374', '12.989145623674318,77.44947433471681', '0', '1', '1');
-                drawRoute('12.989145623674318,77.44947433471681', '13.005286559379101,77.38595962524415', '0', '0', '2');
-                drawRoute('13.005286559379101,77.38595962524415', '13.097930226887641,77.38407135009767', '0', '0', '3');
-                drawRoute('13.097930226887641,77.38407135009767', '13.055876981865168,77.43415355682374', '0', '0', '4');
-                drawRoute('13.073393071348988,77.47462272644044', '13.093248709483944,77.53251552581788', '1', '1', '1');
-                drawRoute('13.093248709483944,77.53251552581788', '13.073393071348988,77.47462272644044', '1', '0', '2');
 
             }
         }
 
+function drawoptimizedroutes(outputtext)
+{
+var outputarray = outputtext.split("], [");
+var sizeofoutputarray = outputarray.length;
 
+for (i=0; i < (sizeofoutputarray); i++)
+{
+
+    var words = outputarray[i].split(",");
+
+        for (j = 1; j < (words.length - 1); j++)
+    {
+        var lstr1 = retLocString(words,  j);
+        var temp1 = s;
+        var lstr2 = retLocString(words,  j+1);
+        var temp2 = s;
+        document.getElementById("demo").innerHTML = document.getElementById("demo").innerHTML + lstr1 + " --- " + lstr2 + " ---" + String(i % 8) + " --- " + temp1 + " --- " + j + "<br>";
+        drawRoute(lstr1, lstr2, Number((i % 8)), Number(temp1), Number(j));
+    }
+
+}
+
+
+
+
+}
+
+function retLocString(words, i)
+{
+
+
+	var localstring = null;
+    var inputwords =words[i];
+    var sourcepointsm = sourcepoints.replace(/,$/, "]");
+    var destinationpointsm = destinationpoints.replace(/,$/, "]");
+    var input2Arr = sourcepointsm.split("], [");
+    var input1Arr = destinationpointsm.split("], [");
+
+    if(inputwords.charAt(2) == "S")
+    {
+    	var index = Number(inputwords.charAt(3));
+
+        localString = String(input2Arr[index - 1])
+
+        s=1;
+    }
+    else
+    {
+    	var index = Number(inputwords.charAt(2));
+
+        localString = String(input1Arr[index - 1]);
+
+        s=0
+
+    }
+    return localString.replace("[[","").replace("]]","")
+}
 
 
     </script>
@@ -286,6 +337,9 @@
 
 
         </div>
+
+        <br>
+<p id="demo"></p><br><br>
 
     </form>
 
